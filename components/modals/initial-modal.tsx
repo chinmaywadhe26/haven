@@ -17,9 +17,11 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import * as z from "zod";
+import  axios from "axios";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
 import { FileUpload } from "../file-upload";
+import { useRouter } from "next/navigation";
 
 const formSchema = z.object({
   name: z.string().min(1, {
@@ -31,6 +33,7 @@ const formSchema = z.object({
 });
 
 export const InitialModal = () => {
+  const router = useRouter();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -42,7 +45,15 @@ export const InitialModal = () => {
   const isLoading = form.formState.isSubmitting;
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
-    console.log("submit values: ", values);
+    try {
+      await axios.post("/api/servers", values);
+      console.log("after post in initial modal")
+      form.reset();
+      router.refresh();
+      window.location.reload();
+    } catch(err) {
+      console.error(err);
+    }
   };
 
   return (
